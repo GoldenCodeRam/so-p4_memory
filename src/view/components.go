@@ -2,6 +2,8 @@ package view
 
 import "github.com/gotk3/gotk3/gtk"
 
+type function func()
+
 func CreateFrame(label string) *gtk.Frame {
 	frame, err := gtk.FrameNew(label)
 	if err != nil {
@@ -26,6 +28,7 @@ func CreateTextBuffer(text string) *gtk.TextBuffer {
 
 func CreateScrolledWindow() *gtk.ScrolledWindow {
     scrolledWindow, err := gtk.ScrolledWindowNew(nil, nil)
+    scrolledWindow.SetMinContentHeight(150)
     if err != nil {
         panic(err)
     }
@@ -70,12 +73,13 @@ func CreateCheckButton(label string) *gtk.CheckButton {
 	return checkButton
 }
 
-func CreateButton(label string) *gtk.Button {
+func CreateButton(label string, onClicked function) *gtk.Button {
 	button, err := gtk.ButtonNewWithLabel(label)
 	if err != nil {
 		panic(err)
 	}
 
+    button.Connect("clicked", onClicked)
 	return button
 }
 

@@ -41,5 +41,6 @@ func generatePack1Content(listeners MainWindowListeners) *gtk.Paned {
 
 func generatePack2Content(listeners MainWindowListeners) *gtk.ScrolledWindow {
 	scrolledWindow := CreateScrolledWindow()
+    // TODO
 	return scrolledWindow
 }
