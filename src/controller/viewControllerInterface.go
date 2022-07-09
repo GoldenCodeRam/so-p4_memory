@@ -65,19 +65,21 @@ func (v *viewController) ShowTransitionRunningToFinishedList() {
 
 }
 
-
 func (v *viewController) AddProcess(process *object.Process) {
 	err := v.Storage.AddProcessToReadyList(&model.Process{
 		Process: process,
 	})
 	if err != nil {
 		utils.ShowErrorDialog(err)
-	} else {
-		// TODO
 	}
 }
 
 func (v *viewController) CreatePartition(partition *object.Partition) {
-    // TODO: Also update the Combobox for the user to select a parititon for
-    // the creation of a process.
+	// TODO: Also update the Combobox for the user to select a parititon for
+	// the creation of a process.
+	err := v.Storage.AddPartition(partition)
+	if err != nil {
+		utils.ShowErrorDialog(err)
+	} else {
+	}
 }

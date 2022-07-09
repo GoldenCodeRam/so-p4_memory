@@ -3,7 +3,9 @@ package view
 import "github.com/gotk3/gotk3/gtk"
 
 type MainWindow struct {
-	Window *gtk.Window
+	Window                     *gtk.Window
+	CreateElementsNotebook     *CreateElementsNotebook
+	SelectListElementsNotebook *SelectListElementsNotebook
 }
 
 type MainWindowListeners interface {
@@ -13,34 +15,22 @@ type MainWindowListeners interface {
 
 func CreateMainWindow(listeners MainWindowListeners) *MainWindow {
 	mainWindow := MainWindow{
-		Window: CreateWindow(),
+		Window:                     CreateWindow(),
+		CreateElementsNotebook:     CreateCreateElementsNotebook(listeners),
+		SelectListElementsNotebook: CreateSelectListElementsNotebook(listeners),
 	}
 
-	mainWindow.Window.Add(generatePanedContent(listeners))
+	horizontalPanel := CreatePaned(gtk.ORIENTATION_HORIZONTAL)
 
-	return &mainWindow
-}
-
-func generatePanedContent(listeners MainWindowListeners) *gtk.Paned {
-	paned := CreatePaned(gtk.ORIENTATION_HORIZONTAL)
-
-	paned.Pack1(generatePack1Content(listeners), true, false)
-	paned.Pack2(generatePack2Content(listeners), true, false)
-
-	return paned
-}
-
-func generatePack1Content(listeners MainWindowListeners) *gtk.Paned {
-	paned := CreatePaned(gtk.ORIENTATION_VERTICAL)
-
-	paned.Pack1(CreateCreateElementsNotebook(listeners).Notebook, true, false)
-	paned.Pack2(CreateSelectListElementsNotebook(listeners).Notebook, true, false)
-
-	return paned
-}
-
-func generatePack2Content(listeners MainWindowListeners) *gtk.ScrolledWindow {
+	verticalPanel := CreatePaned(gtk.ORIENTATION_VERTICAL)
 	scrolledWindow := CreateScrolledWindow()
-    // TODO
-	return scrolledWindow
+
+	verticalPanel.Pack1(mainWindow.CreateElementsNotebook.Notebook, true, false)
+	verticalPanel.Pack2(mainWindow.SelectListElementsNotebook.Notebook, true, false)
+
+	horizontalPanel.Pack1(verticalPanel, true, false)
+	horizontalPanel.Pack2(scrolledWindow, true, false)
+
+	mainWindow.Window.Add(horizontalPanel)
+	return &mainWindow
 }

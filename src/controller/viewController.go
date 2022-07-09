@@ -2,7 +2,6 @@ package controller
 
 import (
 	"so-p4_memory/src/model"
-	"so-p4_memory/src/object"
 	"so-p4_memory/src/view"
 	"sync"
 
@@ -12,7 +11,6 @@ import (
 type viewController struct {
 	MainWindow *view.MainWindow
 	Processor  *model.Processor
-	Partitions []*object.Partition
 	Storage    *model.Storage
 }
 

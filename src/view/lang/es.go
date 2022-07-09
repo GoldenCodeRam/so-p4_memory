@@ -29,5 +29,6 @@ const (
 
     ERROR_INVALID_NUMBER = "Error: número inválido."
     ERROR_EMPTY_TEXT = "Error: texto vacío."
-    ERROR_COULD_NOT_ADD_PROCESS = "Error: no se pudo añadir el proceso."
+    ERROR_COULDNT_ADD_PROCESS = "Error: no se pudo añadir el proceso."
+    ERROR_COULDNT_ADD_PARTITION = "Error: no se pudo añadir la partición."
 )

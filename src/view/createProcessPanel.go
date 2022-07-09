@@ -20,6 +20,7 @@ type CreateProcessPanel struct {
 	ProcessNameEntry            *gtk.Entry
 	ProcessTimeEntry            *gtk.Entry
 	IsProcessBlockedCheckButton *gtk.CheckButton
+	PartitionComboBox           *PartitionComboBox
 }
 
 func CreateCreateProcessPanel(listeners CreateProcessPanelListeners) *CreateProcessPanel {
@@ -29,6 +30,7 @@ func CreateCreateProcessPanel(listeners CreateProcessPanelListeners) *CreateProc
 		ProcessNameEntry:            CreateEntry(),
 		ProcessTimeEntry:            CreateEntry(),
 		IsProcessBlockedCheckButton: CreateCheckButton(lang.IS_BLOCKED),
+		PartitionComboBox:           CreatePartitionComboBox(),
 	}
 
 	grid := CreateGrid()
@@ -37,17 +39,17 @@ func CreateCreateProcessPanel(listeners CreateProcessPanelListeners) *CreateProc
 	processTimeLabel := CreateLabel(lang.TIME)
 
 	addProcessButton := CreateButton(lang.CREATE, func() {
-        panel.createProcess(listeners)
-    })
+		panel.createProcess(listeners)
+	})
 
-    // TODO
-    test, _ := gtk.ListStoreNew(glib.TYPE_BOOLEAN, glib.TYPE_STRING)
-    test.Set(test.Append(), []int{0, 1}, []interface{}{true, "test"})
-    combo, _ := gtk.ComboBoxNewWithModelAndEntry(test)
-    test.Clear()
-    combo.SetEntryTextColumn(1)
-    combo.SetActive(1)
-    // TODO
+	// TODO
+	test, _ := gtk.ListStoreNew(glib.TYPE_BOOLEAN, glib.TYPE_STRING)
+	test.Set(test.Append(), []int{0, 1}, []interface{}{true, "test"})
+	combo, _ := gtk.ComboBoxNewWithModelAndEntry(test)
+	test.Clear()
+	combo.SetEntryTextColumn(1)
+	combo.SetActive(1)
+	// TODO
 
 	grid.Attach(processNameLabel, 0, 0, 1, 1)
 	grid.Attach(processTimeLabel, 0, 1, 1, 1)
@@ -93,5 +95,5 @@ func (c *CreateProcessPanel) createProcess(listeners CreateProcessPanelListeners
 func (c *CreateProcessPanel) resetFields() {
 	c.ProcessNameEntry.SetText("")
 	c.ProcessTimeEntry.SetText("")
-    c.IsProcessBlockedCheckButton.SetActive(false)
+	c.IsProcessBlockedCheckButton.SetActive(false)
 }
