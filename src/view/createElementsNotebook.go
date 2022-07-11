@@ -8,13 +8,15 @@ import (
 
 type CreateElementsNotebookListeners interface {
 	CreateProcessPanelListeners
-    CreatePartitionPanelListeners
+	CreatePartitionPanelListeners
+	MainMenuPanelListeners
 }
 
 type CreateElementsNotebook struct {
 	Notebook             *gtk.Notebook
 	CreateProcessPanel   *CreateProcessPanel
 	CreatePartitionPanel *CreatePartitionPanel
+	MainMenuPanel        *MainMenuPanel
 }
 
 func CreateCreateElementsNotebook(listeners CreateElementsNotebookListeners) *CreateElementsNotebook {
@@ -22,8 +24,13 @@ func CreateCreateElementsNotebook(listeners CreateElementsNotebookListeners) *Cr
 		Notebook:             CreateNotebook(),
 		CreateProcessPanel:   CreateCreateProcessPanel(listeners),
 		CreatePartitionPanel: CreateCreatePartitionPanel(listeners),
+		MainMenuPanel:        CreateMainMenuPanel(listeners),
 	}
 
+	notebook.Notebook.AppendPage(
+		notebook.MainMenuPanel.Box,
+		CreateLabel(lang.MAIN_MENU),
+	)
 	notebook.Notebook.AppendPage(
 		notebook.CreateProcessPanel.Box,
 		CreateLabel(lang.CREATE_PROCESS),

@@ -1,12 +1,13 @@
 package model
 
-import "so-p4_memory/src/object"
+import (
+	"log"
+	"so-p4_memory/src/object"
+)
 
 type ProcessorLogListeners interface {
 	// Ready - Running
 	LogProcessDispatched(process *Process)
-	// Ready - SuspendedReady
-	//LogProcessSuspendedReady(process *Process)
 	// Running - Ready
 	LogProcessTimeout(process *Process)
 	// Running - Blocked
@@ -15,27 +16,27 @@ type ProcessorLogListeners interface {
 	LogProcessFinished(process *Process)
 	// Blocked - Ready
 	LogProcessIOBlockedCompleted(process *Process)
-
-	// Finished all processes
-	LogFinishedProcessing()
 }
 
 const PROCESSING_TIME = 5
 
 type Processor struct {
-	LogListeners ProcessorLogListeners
+	LogListeners   ProcessorLogListeners
+	CurrentProcess *Process
 }
 
-func (p *Processor) Process(process *Process, listeners ProcessorLogListeners) {
-	switch process.State {
+func (p *Processor) Process(listeners ProcessorLogListeners) {
+    log.Default().Printf("Processing process %s:%s", p.CurrentProcess.Name, p.CurrentProcess.State)
+
+	switch p.CurrentProcess.State {
 	case object.READY:
-		p.makeProcessReadyTransition(process)
+		p.makeProcessReadyTransition()
 		break
 	case object.RUNNING:
-		p.makeProcessRunningTransition(process)
+		p.makeProcessRunningTransition()
 		break
 	case object.BLOCKED:
-		p.makeProcessBlockedTransition(process)
+		p.makeProcessBlockedTransition()
 		break
 	case object.FINISHED:
 		panic("State FINISHED should never happen!")
@@ -44,29 +45,33 @@ func (p *Processor) Process(process *Process, listeners ProcessorLogListeners) {
 	}
 }
 
-func (p *Processor) makeProcessReadyTransition(process *Process) {
-	process.State = object.RUNNING
-	process.MakeProcess(PROCESSING_TIME)
-	p.LogListeners.LogProcessDispatched(process)
+func (p *Processor) makeProcessReadyTransition() {
+	p.CurrentProcess.State = object.RUNNING
+	p.CurrentProcess.MakeProcess(PROCESSING_TIME)
+	p.LogListeners.LogProcessDispatched(p.CurrentProcess)
 }
 
-func (p *Processor) makeProcessRunningTransition(process *Process) {
-	if process.HasFinished() {
-		process.State = object.FINISHED
-		p.LogListeners.LogProcessFinished(process)
-		process = nil
-	} else if process.IsBlocked {
-		process.State = object.BLOCKED
-		p.LogListeners.LogProcessBlocked(process)
+func (p *Processor) makeProcessRunningTransition() {
+	if p.CurrentProcess.HasFinished() {
+		p.CurrentProcess.State = object.FINISHED
+		p.LogListeners.LogProcessFinished(p.CurrentProcess)
+		p.CurrentProcess = nil
+	} else if p.CurrentProcess.IsBlocked {
+		p.CurrentProcess.State = object.BLOCKED
+		p.LogListeners.LogProcessBlocked(p.CurrentProcess)
 	} else {
-		process.State = object.READY
-		p.LogListeners.LogProcessTimeout(process)
-		process = nil
+		p.CurrentProcess.State = object.READY
+		p.LogListeners.LogProcessTimeout(p.CurrentProcess)
+		p.CurrentProcess = nil
 	}
 }
 
-func (p *Processor) makeProcessBlockedTransition(process *Process) {
-	process.State = object.READY
-	p.LogListeners.LogProcessIOBlockedCompleted(process)
-	process = nil
+func (p *Processor) makeProcessBlockedTransition() {
+	p.CurrentProcess.State = object.READY
+	p.LogListeners.LogProcessIOBlockedCompleted(p.CurrentProcess)
+	p.CurrentProcess = nil
+}
+
+func (p *Processor) Restart() {
+	p.CurrentProcess = nil
 }

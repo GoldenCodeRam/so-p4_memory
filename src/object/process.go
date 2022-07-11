@@ -2,9 +2,33 @@ package object
 
 import (
 	"fmt"
+	"so-p4_memory/src/view/lang"
 )
 
 type ProcessState int
+type IsBlocked bool
+
+func (p ProcessState) String() string {
+	switch p {
+	case READY:
+		return lang.READY
+	case RUNNING:
+		return lang.RUNNING
+	case BLOCKED:
+		return lang.BLOCKED
+	case FINISHED:
+		return lang.FINISHED
+	}
+	panic("This should not happen!")
+}
+
+func (i IsBlocked) String() string {
+	if i {
+		return lang.YES
+	} else {
+		return lang.NO
+	}
+}
 
 const (
 	READY ProcessState = iota
@@ -17,18 +41,11 @@ type Process struct {
 	Name          string
 	Time          int
 	TimeRemaining int
-	IsBlocked     bool
+	IsBlocked     IsBlocked
 	State         ProcessState
+	Size          int
 
-	Partition PartitionNumber
-}
-
-func (p *Process) GetTimeRemaining() int {
-	return p.TimeRemaining
-}
-
-func (p *Process) HasFinished() bool {
-	return p.TimeRemaining == 0
+	Partition *Partition
 }
 
 func (p *Process) ToString() string {

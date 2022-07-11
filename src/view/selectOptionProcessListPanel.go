@@ -38,7 +38,6 @@ func CreateSelectOptionProcessListPanel(listeners SelectOptionProcessListPanelLi
 
 	// States frame
 	statesFrame.Add(statesFrameBox)
-	statesFrameBox.Add(CreateButton(lang.INPUT_LIST, listeners.ShowStateInputList))
 	statesFrameBox.Add(CreateButton(lang.READY_LIST, listeners.ShowStateReadyList))
 	statesFrameBox.Add(CreateButton(lang.RUNNING_LIST, listeners.ShowStateRunningList))
 	statesFrameBox.Add(CreateButton(lang.BLOCKED_LIST, listeners.ShowStateBlockedList))
@@ -54,6 +53,9 @@ func CreateSelectOptionProcessListPanel(listeners SelectOptionProcessListPanelLi
 
 	panel.ScrolledWindow.Add(box)
 	box.SetSpacing(int(SmallMargin))
+
+    box.Add(CreateButton(lang.INPUT_LIST, listeners.ShowStateInputList))
+
 	box.Add(statesFrame)
 	box.Add(transitionsFrame)
 	return &panel

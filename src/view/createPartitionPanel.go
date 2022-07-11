@@ -4,6 +4,7 @@ import (
 	"log"
 	"so-p4_memory/src/object"
 	"so-p4_memory/src/view/lang"
+	"so-p4_memory/src/view/utils"
 
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -47,5 +48,27 @@ func CreateCreatePartitionPanel(listeners CreatePartitionPanelListeners) *Create
 
 func (c *CreatePartitionPanel) createPartition(listeners CreatePartitionPanelListeners) {
 	log.Default().Println("Creating new partition...")
+	number, err := utils.ExtractIntFromEntry(c.PartitionNumberEntry)
+	if err != nil {
+		utils.ShowErrorDialog(err)
+		c.resetFields()
+		return
+	}
+	size, err := utils.ExtractIntFromEntry(c.PartitionSizeEntry)
+	if err != nil {
+		utils.ShowErrorDialog(err)
+		c.resetFields()
+		return
+	}
 
+	listeners.CreatePartition(&object.Partition{
+		Number: object.PartitionNumber(number),
+		Size:   size,
+	})
+    c.resetFields()
+}
+
+func (c *CreatePartitionPanel) resetFields() {
+	c.PartitionNumberEntry.SetText("")
+	c.PartitionSizeEntry.SetText("")
 }

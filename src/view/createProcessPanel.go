@@ -6,7 +6,6 @@ import (
 	"so-p4_memory/src/view/lang"
 	"so-p4_memory/src/view/utils"
 
-	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
 
@@ -19,6 +18,7 @@ type CreateProcessPanel struct {
 
 	ProcessNameEntry            *gtk.Entry
 	ProcessTimeEntry            *gtk.Entry
+	ProcessSizeEntry            *gtk.Entry
 	IsProcessBlockedCheckButton *gtk.CheckButton
 	PartitionComboBox           *PartitionComboBox
 }
@@ -29,6 +29,7 @@ func CreateCreateProcessPanel(listeners CreateProcessPanelListeners) *CreateProc
 
 		ProcessNameEntry:            CreateEntry(),
 		ProcessTimeEntry:            CreateEntry(),
+		ProcessSizeEntry:            CreateEntry(),
 		IsProcessBlockedCheckButton: CreateCheckButton(lang.IS_BLOCKED),
 		PartitionComboBox:           CreatePartitionComboBox(),
 	}
@@ -37,27 +38,23 @@ func CreateCreateProcessPanel(listeners CreateProcessPanelListeners) *CreateProc
 
 	processNameLabel := CreateLabel(lang.NAME)
 	processTimeLabel := CreateLabel(lang.TIME)
+	processSizeLabel := CreateLabel(lang.SIZE)
+	processPartitionLabel := CreateLabel(lang.PARTITION)
 
 	addProcessButton := CreateButton(lang.CREATE, func() {
 		panel.createProcess(listeners)
 	})
 
-	// TODO
-	test, _ := gtk.ListStoreNew(glib.TYPE_BOOLEAN, glib.TYPE_STRING)
-	test.Set(test.Append(), []int{0, 1}, []interface{}{true, "test"})
-	combo, _ := gtk.ComboBoxNewWithModelAndEntry(test)
-	test.Clear()
-	combo.SetEntryTextColumn(1)
-	combo.SetActive(1)
-	// TODO
-
 	grid.Attach(processNameLabel, 0, 0, 1, 1)
 	grid.Attach(processTimeLabel, 0, 1, 1, 1)
+	grid.Attach(processSizeLabel, 0, 2, 1, 1)
 	grid.Attach(panel.ProcessNameEntry, 1, 0, 1, 1)
 	grid.Attach(panel.ProcessTimeEntry, 1, 1, 1, 1)
-	grid.Attach(panel.IsProcessBlockedCheckButton, 0, 2, 2, 1)
-	grid.Attach(addProcessButton, 0, 3, 2, 1)
-	grid.Attach(combo, 0, 4, 2, 1)
+	grid.Attach(panel.ProcessSizeEntry, 1, 2, 1, 1)
+	grid.Attach(panel.IsProcessBlockedCheckButton, 0, 3, 2, 1)
+	grid.Attach(processPartitionLabel, 0, 4, 2, 1)
+	grid.Attach(panel.PartitionComboBox.ComboBox, 0, 5, 2, 1)
+	grid.Attach(addProcessButton, 0, 6, 2, 1)
 
 	panel.Box.SetCenterWidget(grid)
 
@@ -67,7 +64,7 @@ func CreateCreateProcessPanel(listeners CreateProcessPanelListeners) *CreateProc
 func (c *CreateProcessPanel) createProcess(listeners CreateProcessPanelListeners) {
 	log.Default().Println("Creating new process...")
 
-	name, err := utils.ExtractTextFromEntry(c.ProcessTimeEntry)
+	name, err := utils.ExtractTextFromEntry(c.ProcessNameEntry)
 	if err != nil {
 		utils.ShowErrorDialog(err)
 		c.resetFields()
@@ -81,12 +78,28 @@ func (c *CreateProcessPanel) createProcess(listeners CreateProcessPanelListeners
 		return
 	}
 
+	size, err := utils.ExtractIntFromEntry(c.ProcessSizeEntry)
+	if err != nil {
+		utils.ShowErrorDialog(err)
+		c.resetFields()
+		return
+	}
+
+	partition, err := c.PartitionComboBox.GetSelectedPartition()
+	if err != nil {
+		utils.ShowErrorDialog(err)
+		c.resetFields()
+		return
+	}
+
 	listeners.AddProcess(&object.Process{
 		Name:          name,
 		Time:          time,
 		TimeRemaining: time,
-		IsBlocked:     c.IsProcessBlockedCheckButton.GetActive(),
+		Size:          size,
+		IsBlocked:     object.IsBlocked(c.IsProcessBlockedCheckButton.GetActive()),
 		State:         object.READY,
+		Partition:     partition,
 	})
 
 	c.resetFields()
@@ -95,5 +108,6 @@ func (c *CreateProcessPanel) createProcess(listeners CreateProcessPanelListeners
 func (c *CreateProcessPanel) resetFields() {
 	c.ProcessNameEntry.SetText("")
 	c.ProcessTimeEntry.SetText("")
+	c.ProcessSizeEntry.SetText("")
 	c.IsProcessBlockedCheckButton.SetActive(false)
 }

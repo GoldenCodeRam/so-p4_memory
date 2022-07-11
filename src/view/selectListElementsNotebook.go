@@ -29,7 +29,7 @@ func CreateSelectListElementsNotebook(listeners SelectListElementsNotebookListen
 		CreateLabel(lang.PROCESSES),
 	)
 	notebook.Notebook.AppendPage(
-		notebook.SelectOptionPartitionListPanel.Box,
+		notebook.SelectOptionPartitionListPanel.ScrolledWindow,
 		CreateLabel(lang.PARTITIONS),
 	)
 

@@ -6,6 +6,7 @@ type MainWindow struct {
 	Window                     *gtk.Window
 	CreateElementsNotebook     *CreateElementsNotebook
 	SelectListElementsNotebook *SelectListElementsNotebook
+	ProcessesOutputPanel       *ProcessesOutputPanel
 }
 
 type MainWindowListeners interface {
@@ -18,18 +19,18 @@ func CreateMainWindow(listeners MainWindowListeners) *MainWindow {
 		Window:                     CreateWindow(),
 		CreateElementsNotebook:     CreateCreateElementsNotebook(listeners),
 		SelectListElementsNotebook: CreateSelectListElementsNotebook(listeners),
+		ProcessesOutputPanel:       CreateProcessesOutputPanel(),
 	}
 
 	horizontalPanel := CreatePaned(gtk.ORIENTATION_HORIZONTAL)
 
 	verticalPanel := CreatePaned(gtk.ORIENTATION_VERTICAL)
-	scrolledWindow := CreateScrolledWindow()
 
 	verticalPanel.Pack1(mainWindow.CreateElementsNotebook.Notebook, true, false)
 	verticalPanel.Pack2(mainWindow.SelectListElementsNotebook.Notebook, true, false)
 
 	horizontalPanel.Pack1(verticalPanel, true, false)
-	horizontalPanel.Pack2(scrolledWindow, true, false)
+	horizontalPanel.Pack2(mainWindow.ProcessesOutputPanel.Box, true, false)
 
 	mainWindow.Window.Add(horizontalPanel)
 	return &mainWindow
