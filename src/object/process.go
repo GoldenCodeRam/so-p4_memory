@@ -18,6 +18,8 @@ func (p ProcessState) String() string {
 		return lang.BLOCKED
 	case FINISHED:
 		return lang.FINISHED
+	case NOT_ENOUGH_SPACE:
+		return lang.NOT_ENOUGH_SPACE
 	}
 	panic("This should not happen!")
 }
@@ -35,6 +37,7 @@ const (
 	RUNNING
 	BLOCKED
 	FINISHED
+	NOT_ENOUGH_SPACE
 )
 
 type Process struct {

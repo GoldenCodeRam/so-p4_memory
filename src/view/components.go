@@ -16,6 +16,15 @@ func CreateFrame(label string) *gtk.Frame {
 	return frame
 }
 
+func CreateSeparator(orientation gtk.Orientation) *gtk.Separator {
+    separator, err := gtk.SeparatorNew(orientation)
+    if err != nil {
+        panic(err)
+    }
+
+    return separator
+}
+
 func CreateTextBuffer(text string) *gtk.TextBuffer {
     textBuffer, err := gtk.TextBufferNew(nil)
     if err != nil {

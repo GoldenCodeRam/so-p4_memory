@@ -38,111 +38,60 @@ func (v *viewController) StartApplication() {
 	gtk.Init(nil)
 
 	v.MainWindow = view.CreateMainWindow(v)
-	v.MainWindow.Window.SetDefaultSize(800, 600)
-	v.MainWindow.Window.ShowAll()
+	v.MainWindow.StartMainWindow()
 
 	gtk.Main()
 }
 
 func (v *viewController) startProcessor() {
 	log.Default().Println("Making processor tick...")
-	for _, partition := range v.Storage.Partitions {
-		for len(partition.Processes) > 0 || v.Processor.CurrentProcess != nil {
-			log.Default().Printf("Starting with partition %d", partition.Number)
 
-			if v.Processor.CurrentProcess == nil {
-				process := model.Process{
-					Process: partition.Processes[0],
-				}
-				v.Processor.CurrentProcess = &process
-				partition.Processes = partition.Processes[1:]
-			}
+	process := v.Storage.GetNextReadyProcess()
 
+	for process != nil {
+		v.Processor.CurrentPartition = v.Storage.GetNextAvailablePartition(process)
+		v.Processor.CurrentPartition.Process = process
+		process.Partition = v.Processor.CurrentPartition.Partition
+
+		for v.Processor.CurrentPartition != nil {
 			v.Processor.Process(v)
 		}
+		process = v.Storage.GetNextReadyProcess()
 	}
 }
 
-func (v *viewController) updateAllStatesTreeViews(partition *object.Partition) {
-	v.updateInputProcessesTreeView(partition)
-	v.updateReadyProcessesTreeView(partition)
-	v.updateRunningProcessesTreeView(partition)
-	v.updateBlockedProcessesTreeView(partition)
-	v.updateFinishedProcessesTreeView(partition)
-
-	v.updateReadyToRunningProcessesTreeView(partition)
-	v.updateRunningToReadyProcessesTreeView(partition)
-	v.updateRunningToBlockedProcessesTreeView(partition)
-	v.updateBlockedToReadyProcessesTreeView(partition)
-	v.updateRunningToFinishedProcessesTreeView(partition)
+func (v *viewController) updateAllProcessLogsTreeViews() {
+	v.MainWindow.UpdateTreeView(v.Storage.ExportInputProcessesListToLogList(), view.LOG_PROCESSES_TREE_VIEW)
+	v.MainWindow.UpdateTreeView(v.Storage.GetLogList(model.READY_PROCESSES_LOG_LIST), view.READY_PROCESSES_TREE_VIEW)
+	v.MainWindow.UpdateTreeView(v.Storage.GetLogList(model.RUNNING_PROCESSES_LOG_LIST), view.RUNNING_PROCESSES_TREE_VIEW)
+	v.MainWindow.UpdateTreeView(v.Storage.GetLogList(model.BLOCKED_PROCESSES_LOG_LIST), view.BLOCKED_PROCESSES_TREE_VIEW)
+	v.MainWindow.UpdateTreeView(v.Storage.GetLogList(model.FINISHED_PROCESSES_LOG_LIST), view.FINISHED_PROCESSES_TREE_VIEW)
 }
 
-func (v *viewController) updateInputProcessesTreeView(partition *object.Partition) {
-	v.MainWindow.ProcessesOutputPanel.UpdateInputProcessesTreeView(
-        partition,
+func (v *viewController) updateAllProcessLogsByPartitionTreeViews(partition *object.Partition) {
+	v.MainWindow.UpdateProcessesLogTreeViewByPartition(
 		v.Storage.ExportInputProcessesListToLogList(),
+		view.LOG_PROCESSES_TREE_VIEW,
+		partition,
 	)
-}
-
-func (v *viewController) updateReadyProcessesTreeView(partition *object.Partition) {
-	v.MainWindow.ProcessesOutputPanel.UpdateReadyProcessesTreeView(
-        partition,
-		v.Storage.ReadyProcessesLogList,
+	v.MainWindow.UpdateProcessesLogTreeViewByPartition(
+		v.Storage.GetLogList(model.READY_PROCESSES_LOG_LIST),
+		view.READY_PROCESSES_TREE_VIEW,
+		partition,
 	)
-}
-
-func (v *viewController) updateRunningProcessesTreeView(partition *object.Partition) {
-	v.MainWindow.ProcessesOutputPanel.UpdateRunningProcessesTreeView(
-        partition,
-		v.Storage.RunningProcessesLogList,
+	v.MainWindow.UpdateProcessesLogTreeViewByPartition(
+		v.Storage.GetLogList(model.RUNNING_PROCESSES_LOG_LIST),
+		view.RUNNING_PROCESSES_TREE_VIEW,
+		partition,
 	)
-}
-
-func (v *viewController) updateBlockedProcessesTreeView(partition *object.Partition) {
-	v.MainWindow.ProcessesOutputPanel.UpdateBlockedProcessesTreeView(
-        partition,
-		v.Storage.BlockedProcessesLogList,
+	v.MainWindow.UpdateProcessesLogTreeViewByPartition(
+		v.Storage.GetLogList(model.BLOCKED_PROCESSES_LOG_LIST),
+		view.BLOCKED_PROCESSES_TREE_VIEW,
+		partition,
 	)
-}
-
-func (v *viewController) updateFinishedProcessesTreeView(partition *object.Partition) {
-	v.MainWindow.ProcessesOutputPanel.UpdateFinishedProcessesTreeView(
-        partition,
-		v.Storage.FinishedProcessesLogList,
-	)
-}
-
-func (v *viewController) updateReadyToRunningProcessesTreeView(partition *object.Partition) {
-	v.MainWindow.ProcessesOutputPanel.UpdateReadyToRunningProcessesTreeView(
-        partition,
-		v.Storage.ReadyToRunningProcessesLogList,
-	)
-}
-
-func (v *viewController) updateRunningToReadyProcessesTreeView(partition *object.Partition) {
-	v.MainWindow.ProcessesOutputPanel.UpdateRunningToReadyProcessesTreeView(
-        partition,
-		v.Storage.RunningToReadyProcessesLogList,
-	)
-}
-
-func (v *viewController) updateRunningToBlockedProcessesTreeView(partition *object.Partition) {
-	v.MainWindow.ProcessesOutputPanel.UpdateRunningToBlockedProcessesTreeView(
-        partition,
-		v.Storage.RunningToBlockedProcessesLogList,
-	)
-}
-
-func (v *viewController) updateBlockedToReadyProcessesTreeView(partition *object.Partition) {
-	v.MainWindow.ProcessesOutputPanel.UpdateBlockedToReadyProcessesTreeView(
-        partition,
-		v.Storage.BlockedToReadyProcessesLogList,
-	)
-}
-
-func (v *viewController) updateRunningToFinishedProcessesTreeView(partition *object.Partition) {
-	v.MainWindow.ProcessesOutputPanel.UpdateRunningToFinishedProcessesTreeView(
-        partition,
-		v.Storage.RunningToFinishedProcessesLogList,
+	v.MainWindow.UpdateProcessesLogTreeViewByPartition(
+		v.Storage.GetLogList(model.FINISHED_PROCESSES_LOG_LIST),
+		view.FINISHED_PROCESSES_TREE_VIEW,
+		partition,
 	)
 }

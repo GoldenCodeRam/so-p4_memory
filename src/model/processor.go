@@ -21,14 +21,13 @@ type ProcessorLogListeners interface {
 const PROCESSING_TIME = 5
 
 type Processor struct {
-	LogListeners   ProcessorLogListeners
-	CurrentProcess *Process
+	LogListeners     ProcessorLogListeners
+	CurrentPartition *Partition
 }
 
 func (p *Processor) Process(listeners ProcessorLogListeners) {
-    log.Default().Printf("Processing process %s:%s", p.CurrentProcess.Name, p.CurrentProcess.State)
-
-	switch p.CurrentProcess.State {
+	log.Default().Printf("Processing process %s:%s", p.CurrentPartition.Process.Name, p.CurrentPartition.Process.State)
+	switch p.CurrentPartition.Process.State {
 	case object.READY:
 		p.makeProcessReadyTransition()
 		break
@@ -46,32 +45,38 @@ func (p *Processor) Process(listeners ProcessorLogListeners) {
 }
 
 func (p *Processor) makeProcessReadyTransition() {
-	p.CurrentProcess.State = object.RUNNING
-	p.CurrentProcess.MakeProcess(PROCESSING_TIME)
-	p.LogListeners.LogProcessDispatched(p.CurrentProcess)
+	p.CurrentPartition.Process.State = object.RUNNING
+	p.CurrentPartition.Process.MakeProcess(PROCESSING_TIME)
+	p.LogListeners.LogProcessDispatched(p.CurrentPartition.Process)
 }
 
 func (p *Processor) makeProcessRunningTransition() {
-	if p.CurrentProcess.HasFinished() {
-		p.CurrentProcess.State = object.FINISHED
-		p.LogListeners.LogProcessFinished(p.CurrentProcess)
-		p.CurrentProcess = nil
-	} else if p.CurrentProcess.IsBlocked {
-		p.CurrentProcess.State = object.BLOCKED
-		p.LogListeners.LogProcessBlocked(p.CurrentProcess)
+	if p.CurrentPartition.Process.HasFinished() {
+		p.CurrentPartition.Process.State = object.FINISHED
+		p.LogListeners.LogProcessFinished(p.CurrentPartition.Process)
+		p.clearCurrentPartition()
+	} else if p.CurrentPartition.Process.IsBlocked {
+		p.CurrentPartition.Process.State = object.BLOCKED
+		p.LogListeners.LogProcessBlocked(p.CurrentPartition.Process)
 	} else {
-		p.CurrentProcess.State = object.READY
-		p.LogListeners.LogProcessTimeout(p.CurrentProcess)
-		p.CurrentProcess = nil
+		p.CurrentPartition.Process.State = object.READY
+		p.LogListeners.LogProcessTimeout(p.CurrentPartition.Process)
+		p.clearCurrentPartition()
 	}
 }
 
 func (p *Processor) makeProcessBlockedTransition() {
-	p.CurrentProcess.State = object.READY
-	p.LogListeners.LogProcessIOBlockedCompleted(p.CurrentProcess)
-	p.CurrentProcess = nil
+	p.CurrentPartition.Process.State = object.READY
+	p.LogListeners.LogProcessIOBlockedCompleted(p.CurrentPartition.Process)
+	p.clearCurrentPartition()
 }
 
 func (p *Processor) Restart() {
-	p.CurrentProcess = nil
+	p.clearCurrentPartition()
+}
+
+func (p *Processor) clearCurrentPartition() {
+	p.CurrentPartition.Process.Partition = nil
+	p.CurrentPartition.Process = nil
+	p.CurrentPartition = nil
 }

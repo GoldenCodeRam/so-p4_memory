@@ -16,29 +16,29 @@ type CreatePartitionPanelListeners interface {
 type CreatePartitionPanel struct {
 	Box *gtk.Box
 
-	PartitionNumberEntry *gtk.Entry
-	PartitionSizeEntry   *gtk.Entry
+	PartitionNameEntry *gtk.Entry
+	PartitionSizeEntry *gtk.Entry
 }
 
 func CreateCreatePartitionPanel(listeners CreatePartitionPanelListeners) *CreatePartitionPanel {
 	panel := CreatePartitionPanel{
 		Box: CreateBox(gtk.ORIENTATION_HORIZONTAL, SmallMargin),
 
-		PartitionNumberEntry: CreateEntry(),
-		PartitionSizeEntry:   CreateEntry(),
+		PartitionNameEntry: CreateEntry(),
+		PartitionSizeEntry: CreateEntry(),
 	}
 
 	grid := CreateGrid()
 
-	partitionNumberLabel := CreateLabel(lang.PARTITION_NUMBER)
+	partitionNameLabel := CreateLabel(lang.PARTITION_NAME)
 	partitionSizeLabel := CreateLabel(lang.PARTITION_SIZE)
 	addPartitionButton := CreateButton(lang.CREATE, func() {
 		panel.createPartition(listeners)
 	})
 
-	grid.Attach(partitionNumberLabel, 0, 0, 1, 1)
+	grid.Attach(partitionNameLabel, 0, 0, 1, 1)
 	grid.Attach(partitionSizeLabel, 0, 1, 1, 1)
-	grid.Attach(panel.PartitionNumberEntry, 1, 0, 1, 1)
+	grid.Attach(panel.PartitionNameEntry, 1, 0, 1, 1)
 	grid.Attach(panel.PartitionSizeEntry, 1, 1, 1, 1)
 	grid.Attach(addPartitionButton, 0, 3, 2, 1)
 
@@ -48,7 +48,7 @@ func CreateCreatePartitionPanel(listeners CreatePartitionPanelListeners) *Create
 
 func (c *CreatePartitionPanel) createPartition(listeners CreatePartitionPanelListeners) {
 	log.Default().Println("Creating new partition...")
-	number, err := utils.ExtractIntFromEntry(c.PartitionNumberEntry)
+	name, err := utils.ExtractTextFromEntry(c.PartitionNameEntry)
 	if err != nil {
 		utils.ShowErrorDialog(err)
 		c.resetFields()
@@ -62,13 +62,13 @@ func (c *CreatePartitionPanel) createPartition(listeners CreatePartitionPanelLis
 	}
 
 	listeners.CreatePartition(&object.Partition{
-		Number: object.PartitionNumber(number),
-		Size:   size,
+		Name: name,
+		Size: size,
 	})
-    c.resetFields()
+	c.resetFields()
 }
 
 func (c *CreatePartitionPanel) resetFields() {
-	c.PartitionNumberEntry.SetText("")
+	c.PartitionNameEntry.SetText("")
 	c.PartitionSizeEntry.SetText("")
 }

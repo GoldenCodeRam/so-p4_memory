@@ -10,11 +10,12 @@ import (
 const (
 	PROCESS_NAME = iota
 	PROCESS_TIME
-    PROCESS_SIZE
+	PROCESS_SIZE
 	PROCESS_BLOCKED
 	PROCESS_STATUS
-    PARTITION_NUMBER
-    PARTITION_SIZE
+    PROCESS_TIME_REMAINING
+	PARTITION_NAME
+	PARTITION_SIZE
 )
 
 type ProcessLogTreeView struct {
@@ -23,35 +24,38 @@ type ProcessLogTreeView struct {
 }
 
 func CreateProcessLogTreeView() *ProcessLogTreeView {
-	treeView, listStore := setupTreeView()
+	treeView, listStore := setupProcessLogTreeView()
 	return &ProcessLogTreeView{
 		TreeView:  treeView,
 		listStore: listStore,
 	}
 }
 
-func (p *ProcessLogTreeView) AddRow(process *object.Process) {
+func (p *ProcessLogTreeView) AddRow(processLog *object.ProcessLog) {
 	iter := p.listStore.Append()
+
 	p.listStore.Set(
 		iter,
 		[]int{
-            PROCESS_NAME,
-            PROCESS_TIME,
-            PROCESS_SIZE,
-            PROCESS_BLOCKED,
-            PROCESS_STATUS,
-            PARTITION_NUMBER,
-            PARTITION_SIZE,
-        },
+			PROCESS_NAME,
+			PROCESS_TIME,
+			PROCESS_SIZE,
+			PROCESS_BLOCKED,
+			PROCESS_STATUS,
+            PROCESS_TIME_REMAINING,
+			PARTITION_NAME,
+			PARTITION_SIZE,
+		},
 		[]interface{}{
-            process.Name,
-            process.Time,
-            process.Size,
-            process.IsBlocked.String(),
-            process.State.String(),
-            process.Partition.Number,
-            process.Partition.Size,
-        },
+			processLog.Name,
+			processLog.Time,
+			processLog.Size,
+			processLog.IsBlocked,
+			processLog.State,
+            processLog.TimeRemaining,
+			processLog.PartitionName,
+			processLog.PartitionSize,
+		},
 	)
 }
 
@@ -71,34 +75,35 @@ func (p *ProcessLogTreeView) RemoveRow(process *object.Process) {
 	})
 }
 
-func setupTreeView() (*gtk.TreeView, *gtk.ListStore) {
+func setupProcessLogTreeView() (*gtk.TreeView, *gtk.ListStore) {
 	treeView, _ := gtk.TreeViewNew()
 
-	treeView.AppendColumn(createColumn("Nombre", PROCESS_NAME))
-	treeView.AppendColumn(createColumn("Tiempo", PROCESS_TIME))
-	treeView.AppendColumn(createColumn("Tamaño", PROCESS_SIZE))
-	treeView.AppendColumn(createColumn("¿Se bloquea?", PROCESS_BLOCKED))
-	treeView.AppendColumn(createColumn("Estado", PROCESS_STATUS))
-	treeView.AppendColumn(createColumn("Número de partición", PARTITION_NUMBER))
-	treeView.AppendColumn(createColumn("Tamaño de partición", PARTITION_SIZE))
+	treeView.AppendColumn(createProcessLogColumn("Nombre", PROCESS_NAME))
+	treeView.AppendColumn(createProcessLogColumn("Tiempo", PROCESS_TIME))
+	treeView.AppendColumn(createProcessLogColumn("Tamaño", PROCESS_SIZE))
+	treeView.AppendColumn(createProcessLogColumn("¿Se bloquea?", PROCESS_BLOCKED))
+	treeView.AppendColumn(createProcessLogColumn("Estado", PROCESS_STATUS))
+	treeView.AppendColumn(createProcessLogColumn("Tiempo restante", PROCESS_TIME_REMAINING))
+	treeView.AppendColumn(createProcessLogColumn("Nombre de partición", PARTITION_NAME))
+	treeView.AppendColumn(createProcessLogColumn("Tamaño de partición", PARTITION_SIZE))
 
 	listStore, _ := gtk.ListStoreNew(
-        glib.TYPE_STRING,
-        glib.TYPE_INT,
-        glib.TYPE_INT,
-        glib.TYPE_STRING,
-        glib.TYPE_STRING,
-        glib.TYPE_INT,
-        glib.TYPE_INT,
-    )
+		glib.TYPE_STRING,
+		glib.TYPE_INT,
+		glib.TYPE_INT,
+		glib.TYPE_STRING,
+		glib.TYPE_STRING,
+		glib.TYPE_INT,
+		glib.TYPE_STRING,
+		glib.TYPE_STRING,
+	)
 	treeView.SetModel(listStore)
 
 	return treeView, listStore
 }
 
-func createColumn(columnTitle string, id int) *gtk.TreeViewColumn {
+func createProcessLogColumn(columnTitle string, id int) *gtk.TreeViewColumn {
 	cellRenderer, _ := gtk.CellRendererTextNew()
 	column, _ := gtk.TreeViewColumnNewWithAttribute(columnTitle, cellRenderer, "text", id)
 	return column
 }
-

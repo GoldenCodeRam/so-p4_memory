@@ -10,6 +10,7 @@ import (
 
 type SelectOptionPartitionListPanelListeners interface {
     ShowWithoutPartitionFilters()
+    ShowPartitionsList()
 }
 
 type SelectOptionPartitionListPanel struct {
@@ -24,6 +25,8 @@ func CreateSelectOptionPartitionListPanel(listeners SelectOptionPartitionListPan
 	}
 
 	panel.box.SetSpacing(int(MediumMargin))
+    panel.box.Add(CreateButton(lang.PARTITION_LIST, listeners.ShowPartitionsList))
+    panel.box.Add(CreateSeparator(gtk.ORIENTATION_HORIZONTAL))
     panel.box.Add(CreateButton(lang.WITHOUT_FILTERS, listeners.ShowWithoutPartitionFilters))
 
 	panel.ScrolledWindow.Add(panel.box)
@@ -31,6 +34,6 @@ func CreateSelectOptionPartitionListPanel(listeners SelectOptionPartitionListPan
 }
 
 func (c *SelectOptionPartitionListPanel) AddPartitionSelectionButton(partition *object.Partition, onClick function) {
-	c.box.Add(CreateButton(fmt.Sprintf("Filtrar por partición %d", partition.Number), onClick))
+	c.box.Add(CreateButton(fmt.Sprintf("Filtrar por partición %s", partition.Name), onClick))
     c.box.ShowAll()
 }

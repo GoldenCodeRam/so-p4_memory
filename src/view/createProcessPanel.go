@@ -11,6 +11,7 @@ import (
 
 type CreateProcessPanelListeners interface {
 	AddProcess(process *object.Process)
+	GetPartitionWithName(partitionName string) *object.Partition
 }
 
 type CreateProcessPanel struct {
@@ -20,7 +21,6 @@ type CreateProcessPanel struct {
 	ProcessTimeEntry            *gtk.Entry
 	ProcessSizeEntry            *gtk.Entry
 	IsProcessBlockedCheckButton *gtk.CheckButton
-	PartitionComboBox           *PartitionComboBox
 }
 
 func CreateCreateProcessPanel(listeners CreateProcessPanelListeners) *CreateProcessPanel {
@@ -31,7 +31,6 @@ func CreateCreateProcessPanel(listeners CreateProcessPanelListeners) *CreateProc
 		ProcessTimeEntry:            CreateEntry(),
 		ProcessSizeEntry:            CreateEntry(),
 		IsProcessBlockedCheckButton: CreateCheckButton(lang.IS_BLOCKED),
-		PartitionComboBox:           CreatePartitionComboBox(),
 	}
 
 	grid := CreateGrid()
@@ -39,7 +38,6 @@ func CreateCreateProcessPanel(listeners CreateProcessPanelListeners) *CreateProc
 	processNameLabel := CreateLabel(lang.NAME)
 	processTimeLabel := CreateLabel(lang.TIME)
 	processSizeLabel := CreateLabel(lang.SIZE)
-	processPartitionLabel := CreateLabel(lang.PARTITION)
 
 	addProcessButton := CreateButton(lang.CREATE, func() {
 		panel.createProcess(listeners)
@@ -52,9 +50,7 @@ func CreateCreateProcessPanel(listeners CreateProcessPanelListeners) *CreateProc
 	grid.Attach(panel.ProcessTimeEntry, 1, 1, 1, 1)
 	grid.Attach(panel.ProcessSizeEntry, 1, 2, 1, 1)
 	grid.Attach(panel.IsProcessBlockedCheckButton, 0, 3, 2, 1)
-	grid.Attach(processPartitionLabel, 0, 4, 2, 1)
-	grid.Attach(panel.PartitionComboBox.ComboBox, 0, 5, 2, 1)
-	grid.Attach(addProcessButton, 0, 6, 2, 1)
+	grid.Attach(addProcessButton, 0, 4, 2, 1)
 
 	panel.Box.SetCenterWidget(grid)
 
@@ -85,13 +81,6 @@ func (c *CreateProcessPanel) createProcess(listeners CreateProcessPanelListeners
 		return
 	}
 
-	partition, err := c.PartitionComboBox.GetSelectedPartition()
-	if err != nil {
-		utils.ShowErrorDialog(err)
-		c.resetFields()
-		return
-	}
-
 	listeners.AddProcess(&object.Process{
 		Name:          name,
 		Time:          time,
@@ -99,7 +88,6 @@ func (c *CreateProcessPanel) createProcess(listeners CreateProcessPanelListeners
 		Size:          size,
 		IsBlocked:     object.IsBlocked(c.IsProcessBlockedCheckButton.GetActive()),
 		State:         object.READY,
-		Partition:     partition,
 	})
 
 	c.resetFields()

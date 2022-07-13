@@ -1,5 +1,7 @@
 package lang
 
+import "fmt"
+
 const (
     IS_BLOCKED = "¿Se bloquea?"
     CREATE = "Crear"
@@ -8,6 +10,7 @@ const (
     NAME = "Nombre"
     TIME = "Tiempo"
     SIZE = "Tamaño"
+    CLOSE = "Cerrar"
     PARTITION = "Partición"
     PROCESSES = "Procesos"
     PARTITIONS = "Particiones"
@@ -18,6 +21,10 @@ const (
     WITHOUT_FILTERS = "Sin filtros"
     START_PROCESSOR = "Iniciar procesador"
     RESET_PROCESSOR = "Reiniciar procesador"
+    PARTITION_NAME = "Nombre de la partición"
+    NOT_ENOUGH_SPACE = "Espacio insuficiente"
+    DOES_NOT_APPLY = "N/A"
+    PARTITION_LIST = "Lista de particiones"
 
     READY = "Listo"
     RUNNING = "En ejecución"
@@ -27,7 +34,7 @@ const (
     YES = "Sí"
     NO = "No"
 
-    PROCESSOR_FINISHED = "El procesador ha termindo"
+    PROCESSOR_FINISHED = "El procesador ha terminado"
 
     // States
     INPUT_LIST = "Lista de entradas"
@@ -43,10 +50,17 @@ const (
     BLOCKED_TO_READY = "E/S terminado"
     RUNNING_TO_FINISHED = "En-ejecución a terminado"
 
-
     ERROR_INVALID_NUMBER = "Error: número inválido."
     ERROR_EMPTY_TEXT = "Error: texto vacío."
     ERROR_COULDNT_ADD_PROCESS = "Error: no se pudo añadir el proceso."
     ERROR_COULDNT_ADD_PARTITION = "Error: no se pudo añadir la partición."
     ERROR_PARTITION_NOT_SELECTED = "Error: no se ha seleccionado una partición."
+
+    // Formatted strings
+    ERROR_PARTITION_X_ALREADY_ADDED = "Error: la partición %s ya se encuentra añadida."
+    ERROR_PROCESS_NAME_X_ALREADY_ADDED = "Error: el nombre %s de proceso ya se encuentra añadido."
 )
+
+func FormatString(format string, args ...string) string {
+    return fmt.Sprintf(format, args)
+}

@@ -2,7 +2,6 @@ package view
 
 import (
 	"errors"
-	"fmt"
 	"so-p4_memory/src/object"
 	"so-p4_memory/src/view/lang"
 
@@ -11,8 +10,8 @@ import (
 )
 
 type PartitionComboBox struct {
-	ComboBox  *gtk.ComboBox
-	ListStore *gtk.ListStore
+	comboBox  *gtk.ComboBox
+	listStore *gtk.ListStore
 }
 
 func CreatePartitionComboBox() *PartitionComboBox {
@@ -25,8 +24,8 @@ func CreatePartitionComboBox() *PartitionComboBox {
 	comboBox.SetSensitive(false)
 	comboBox.SetEntryTextColumn(0)
 	partitionComboBox := PartitionComboBox{
-		ComboBox:  comboBox,
-		ListStore: listStore,
+		comboBox:  comboBox,
+		listStore: listStore,
 	}
 	return &partitionComboBox
 }
@@ -42,33 +41,32 @@ func generateListStore() *gtk.ListStore {
 	return listStore
 }
 
-func (p *PartitionComboBox) GetSelectedPartition() (*object.Partition, error) {
-	tree, _ := p.ComboBox.GetActiveIter()
-	model, _ := p.ComboBox.GetModel()
-	value, _ := model.ToTreeModel().GetValue(tree, 1)
-	partition := value.GetPointer()
+func (p *PartitionComboBox) GetSelectedPartition() (string, error) {
+	tree, _ := p.comboBox.GetActiveIter()
+	model, _ := p.comboBox.GetModel()
+	value, _ := model.ToTreeModel().GetValue(tree, 0)
+	partition, _ := value.GetString()
 
-	if partition != nil {
-		return (*object.Partition)(partition), nil
+	if partition != "" {
+		return partition, nil
 	} else {
-		return nil, errors.New(lang.ERROR_PARTITION_NOT_SELECTED)
+		return "", errors.New(lang.ERROR_PARTITION_NOT_SELECTED)
 	}
 }
 
 func (p *PartitionComboBox) AddPartition(partition *object.Partition) {
-	p.ListStore.Set(
-		p.ListStore.Append(),
-		[]int{0, 1},
+	p.listStore.Set(
+		p.listStore.Append(),
+		[]int{0},
 		[]interface{}{
-			fmt.Sprintf("Partición %d", partition.Number),
-			partition,
+			partition.Name,
 		},
 	)
-	p.ComboBox.SetSensitive(true)
-	p.ComboBox.SetActive(0)
+	p.comboBox.SetSensitive(true)
+	p.comboBox.SetActive(0)
 }
 
 func (p *PartitionComboBox) Reset() {
-	p.ListStore.Clear()
-	p.ComboBox.SetSensitive(false)
+	p.listStore.Clear()
+	p.comboBox.SetSensitive(false)
 }
